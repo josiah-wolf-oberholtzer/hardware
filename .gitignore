@@ -33,3 +33,6 @@
 
 # Build artifacts
 */build
+
+# OSX
+.DS_Store

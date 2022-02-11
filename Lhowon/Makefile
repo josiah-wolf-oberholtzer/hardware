@@ -1,8 +1,8 @@
 # Project Name
-TARGET = PatchLhowon
+TARGET = LhowonVersio
 
 # Sources
-CPP_SOURCES = Lhowon.cpp
+CPP_SOURCES = LhowonVersio.cpp
 
 DEBUG=1
 

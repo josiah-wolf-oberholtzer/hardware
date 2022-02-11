@@ -1,65 +1,60 @@
-#include "daisy_versio.h"
 #include "daisysp.h"
-#include <string>
 #include "Panner.h"
 
-using namespace daisy;
 using namespace daisysp;
 
-DaisyVersio hw;
+class Lhowon {
+public:
+    Lhowon() {}
+    ~Lhowon() {}
 
-Panner panner_a;
-Panner panner_b;
-CrossFade xfader;
-
-static float buffer[2];
-static float panned_a[2];
-static float panned_b[2];
-static float feedback[2];
-static float feedback_level;
-
-void callback(
-    AudioHandle::InterleavingInputBuffer  in,
-    AudioHandle::InterleavingOutputBuffer out,
-    size_t                                size
-) {
-    for (size_t i = 0; i < size; i += 2) {
-        buffer[0] = SoftClip(in[i] + (feedback[0] * feedback_level));
-        buffer[1] = SoftClip(in[i + 1] + (feedback[1] * feedback_level));
-
-        panner_a.Process(buffer[0], panned_a);
-        panner_b.Process(buffer[1], panned_b);
-
-        buffer[0] = xfader.Process(panned_a[0], panned_b[0]);
-        buffer[1] = xfader.Process(panned_a[1], panned_b[1]);
-
-        feedback[0] = buffer[0];
-        feedback[1] = buffer[1];
-
-        out[i] = buffer[0];
-        out[i + 1] = buffer[1];
+    void Init(float sample_rate) {
+        feedback_level_ = 0.f;
+        panner_a_.Init();
+        panner_b_.Init();
+        xfader_.Init(CROSSFADE_CPOW);
     }
-}
 
-int main(void) {
-    hw.Init();
-
-    feedback_level = 0.f;
-    panner_a.Init();
-    panner_b.Init();
-    xfader.Init(CROSSFADE_CPOW);
-
-    hw.StartAudio(callback);
-    hw.StartAdc();
-
-    while(1) {
-        hw.ProcessAnalogControls();
-        hw.UpdateExample();
-        hw.UpdateLeds();
-
-        panner_a.SetPos(hw.GetKnobValue(DaisyVersio::KNOB_0));
-        xfader.SetPos(hw.GetKnobValue(DaisyVersio::KNOB_2));
-        panner_b.SetPos(hw.GetKnobValue(DaisyVersio::KNOB_4));
-        feedback_level = hw.GetKnobValue(DaisyVersio::KNOB_6);
+    inline void Process(float in_1, float in_2, float* out) {
+        if (!muted_) {
+            buffer_[0] = SoftClip(in_1 + (feedback_[0] * feedback_level_));
+            buffer_[1] = SoftClip(in_2 + (feedback_[1] * feedback_level_));
+        } else {
+            buffer_[0] = SoftClip(feedback_[0] * feedback_level_);
+            buffer_[1] = SoftClip(feedback_[1] * feedback_level_);
+        }
+        panner_a_.Process(buffer_[0], panned_a_);
+        panner_b_.Process(buffer_[1], panned_b_);
+        buffer_[0] = xfader_.Process(panned_a_[0], panned_b_[0]);
+        buffer_[1] = xfader_.Process(panned_a_[1], panned_b_[1]);
+        feedback_[0] = buffer_[0];
+        feedback_[1] = buffer_[1];
+        out[0] = buffer_[0];
+        out[1] = buffer_[1];
     }
-}
+
+    inline void Update(
+        float panner_a_pos,
+        float panner_b_pos,
+        float xfader_pos,
+        float feedback_level,
+        bool muted
+    ) {
+        panner_a_.SetPos(panner_a_pos);
+        panner_b_.SetPos(panner_b_pos);
+        xfader_.SetPos(xfader_pos);
+        feedback_level_ = feedback_level;
+        muted_ = muted;
+    }
+
+private:
+    CrossFade xfader_;
+    Panner panner_a_;
+    Panner panner_b_;
+    bool muted_;
+    float buffer_[2];
+    float feedback_[2];
+    float feedback_level_;
+    float panned_a_[2];
+    float panned_b_[2];
+};

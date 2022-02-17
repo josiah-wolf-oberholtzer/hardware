@@ -31,7 +31,5 @@ jobs:
       run: make -C libDaisy
     - name: Build DaisySP
       run: make -C DaisySP
-    - name: Build Hronir
-      run: make -C Hronir
-    - name: Build Kaska
-      run: make -C Kaska
+    - name: Build Lhowon
+      run: make -C Lhowon

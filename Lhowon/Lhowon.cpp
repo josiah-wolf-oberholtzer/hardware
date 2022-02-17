@@ -1,8 +1,6 @@
 #include "daisysp.h"
 #include "Panner.h"
 
-using namespace daisysp;
-
 class Lhowon {
 public:
     Lhowon() {}
@@ -12,16 +10,16 @@ public:
         feedback_level_ = 0.f;
         panner_a_.Init();
         panner_b_.Init();
-        xfader_.Init(CROSSFADE_CPOW);
+        xfader_.Init(daisysp::CROSSFADE_CPOW);
     }
 
     inline void Process(float in_1, float in_2, float* out) {
         if (!muted_) {
-            buffer_[0] = SoftClip(in_1 + (feedback_[0] * feedback_level_));
-            buffer_[1] = SoftClip(in_2 + (feedback_[1] * feedback_level_));
+            buffer_[0] = daisysp::SoftClip(in_1 + (feedback_[0] * feedback_level_));
+            buffer_[1] = daisysp::SoftClip(in_2 + (feedback_[1] * feedback_level_));
         } else {
-            buffer_[0] = SoftClip(feedback_[0] * feedback_level_);
-            buffer_[1] = SoftClip(feedback_[1] * feedback_level_);
+            buffer_[0] = daisysp::SoftClip(feedback_[0] * feedback_level_);
+            buffer_[1] = daisysp::SoftClip(feedback_[1] * feedback_level_);
         }
         panner_a_.Process(buffer_[0], panned_a_);
         panner_b_.Process(buffer_[1], panned_b_);
@@ -48,9 +46,9 @@ public:
     }
 
 private:
-    CrossFade xfader_;
-    Panner panner_a_;
-    Panner panner_b_;
+    daisysp::CrossFade xfader_;
+    planetbosch::Panner panner_a_;
+    planetbosch::Panner panner_b_;
     bool muted_;
     float buffer_[2];
     float feedback_[2];

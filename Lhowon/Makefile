@@ -3,6 +3,7 @@ TARGET = LhowonVersio
 
 # Sources
 CPP_SOURCES = LhowonVersio.cpp
+C_INCLUDES = -I../Common/
 
 DEBUG=1
 

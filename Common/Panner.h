@@ -2,6 +2,8 @@
 
 using namespace daisysp;
 
+namespace planetbosch {
+
 class Panner {
 public:
     Panner() {}
@@ -19,3 +21,5 @@ public:
 private:
     float pos_;
 };
+
+}

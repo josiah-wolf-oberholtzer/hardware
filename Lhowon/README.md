@@ -10,7 +10,7 @@ Controls:
 - CV4: Global effect
 - CV7: Feedback (L/R summed into Source 1/2)
 - FSU: Mute sources but not feedback
-- ABC: Local effect type (chorus, frequency shift, ???)
-- XYZ: Signal order (local effect before panner, after panner, after global)
+- ABC: Local effect 1 type (chorus, frequency shift, ???)
+- XYZ: Local effect 2 type (chorus, frequency shift, ???)
 
 All knobs assume noon is "zero", with different behavior CW vs CCW.

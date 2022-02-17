@@ -3,16 +3,13 @@
 #include <string>
 #include "Lhowon.cpp"
 
-using namespace daisy;
-using namespace daisysp;
-
-DaisyVersio hw;
+daisy::DaisyVersio hw;
 
 Lhowon lhowon;
 
 void callback(
-    AudioHandle::InterleavingInputBuffer  in,
-    AudioHandle::InterleavingOutputBuffer out,
+    daisy::AudioHandle::InterleavingInputBuffer  in,
+    daisy::AudioHandle::InterleavingOutputBuffer out,
     size_t                                size
 ) {
     for (size_t i = 0; i < size; i += 2) {
@@ -32,10 +29,10 @@ int main(void) {
         hw.UpdateLeds();
 
         lhowon.Update(
-            hw.GetKnobValue(DaisyVersio::KNOB_0),
-            hw.GetKnobValue(DaisyVersio::KNOB_4),
-            hw.GetKnobValue(DaisyVersio::KNOB_2),
-            hw.GetKnobValue(DaisyVersio::KNOB_6),
+            hw.GetKnobValue(daisy::DaisyVersio::KNOB_0),
+            hw.GetKnobValue(daisy::DaisyVersio::KNOB_4),
+            hw.GetKnobValue(daisy::DaisyVersio::KNOB_2),
+            hw.GetKnobValue(daisy::DaisyVersio::KNOB_6),
             hw.Gate()
         );
     }

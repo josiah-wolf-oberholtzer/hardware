@@ -27,12 +27,14 @@ int main(void) {
         hw.ProcessAnalogControls();
         hw.UpdateExample();
         hw.UpdateLeds();
-
         lhowon.Update(
-            hw.GetKnobValue(daisy::DaisyVersio::KNOB_0),
-            hw.GetKnobValue(daisy::DaisyVersio::KNOB_4),
-            hw.GetKnobValue(daisy::DaisyVersio::KNOB_2),
-            hw.GetKnobValue(daisy::DaisyVersio::KNOB_6),
+            hw.GetKnobValue(daisy::DaisyVersio::KNOB_0), // pan A
+            hw.GetKnobValue(daisy::DaisyVersio::KNOB_1), // fx A
+            hw.GetKnobValue(daisy::DaisyVersio::KNOB_2), // xfade
+            hw.GetKnobValue(daisy::DaisyVersio::KNOB_3), // reverb
+            hw.GetKnobValue(daisy::DaisyVersio::KNOB_4), // pan B
+            hw.GetKnobValue(daisy::DaisyVersio::KNOB_5), // fx B
+            hw.GetKnobValue(daisy::DaisyVersio::KNOB_6), // feedback
             hw.Gate()
         );
     }

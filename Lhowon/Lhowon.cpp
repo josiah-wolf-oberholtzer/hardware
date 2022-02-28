@@ -12,16 +12,20 @@ public:
     panner_a_.Init();
     panner_b_.Init();
     reverb_.Init(sample_rate);
-    shifter_a_.Init(sample_rate);
-    shifter_b_.Init(sample_rate);
+    frequency_shifter_a_.Init(sample_rate);
+    frequency_shifter_b_.Init(sample_rate);
     crossfader_.Init(daisysp::CROSSFADE_CPOW);
   }
 
   void Process(float in_1, float in_2, float *out) {
     buffer_[0] =
         daisysp::SoftClip((in_1 * !muted_) + (feedback_[0] * feedback_level_));
+
     buffer_[1] =
         daisysp::SoftClip((in_2 * !muted_) + (feedback_[1] * feedback_level_));
+
+    buffer_[0] = frequency_shifter_a_.Process(buffer_[0]);
+    buffer_[1] = frequency_shifter_a_.Process(buffer_[1]);
 
     panner_a_.Process(buffer_[0], &buffer_[2]);
     panner_b_.Process(buffer_[1], &buffer_[4]);
@@ -29,7 +33,7 @@ public:
     buffer_[0] = crossfader_.Process(buffer_[2], buffer_[4]);
     buffer_[1] = crossfader_.Process(buffer_[3], buffer_[5]);
 
-    reverb_.Process(buffer_[0], buffer_[1], &buffer_[2], &buffer_[3]);
+    // reverb_.Process(buffer_[0], buffer_[1], &buffer_[2], &buffer_[3]);
 
     feedback_[0] = buffer_[0];
     feedback_[1] = buffer_[1];
@@ -39,13 +43,17 @@ public:
   }
 
   void SetFrequencyShifterA(float value) {
-    float frequency = (value - 0.5) * 1000.f;
-    shifter_a_.SetFrequency(frequency);
+    int sign = (0.f < value) - (value < 0.f);
+    float scale = powf((value - 0.5) * 2.f, 2.f);
+    float frequency = 100.f * sign * scale;
+    frequency_shifter_a_.SetFrequency(frequency);
   }
 
   void SetFrequencyShifterB(float value) {
-    float frequency = (value - 0.5) * 1000.f;
-    shifter_b_.SetFrequency(frequency);
+    int sign = (0.f < value) - (value < 0.f);
+    float scale = powf((value - 0.5) * 2.f, 2.f);
+    float frequency = 100.f * sign * scale;
+    frequency_shifter_b_.SetFrequency(frequency);
   }
 
   void SetPannerA(float value) { panner_a_.SetPos(value); }
@@ -82,8 +90,8 @@ private:
   float buffer_[8];
   float feedback_[2];
   float feedback_level_;
-  planetbosch::FrequencyShifter shifter_a_;
-  planetbosch::FrequencyShifter shifter_b_;
+  planetbosch::FrequencyShifter frequency_shifter_a_;
+  planetbosch::FrequencyShifter frequency_shifter_b_;
   planetbosch::Panner panner_a_;
   planetbosch::Panner panner_b_;
 };

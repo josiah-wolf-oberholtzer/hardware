@@ -31,6 +31,6 @@ int main(void) {
                   hw.GetKnobValue(daisy::DaisyVersio::KNOB_4), // pan B
                   hw.GetKnobValue(daisy::DaisyVersio::KNOB_5), // fx B
                   hw.GetKnobValue(daisy::DaisyVersio::KNOB_6), // feedback
-                  hw.Gate());
+                  hw.Gate() || hw.SwitchPressed());
   }
 }

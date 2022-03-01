@@ -25,7 +25,7 @@ public:
         daisysp::SoftClip((in_2 * !muted_) + (feedback_[1] * feedback_level_));
 
     buffer_[0] = frequency_shifter_a_.Process(buffer_[0]);
-    buffer_[1] = frequency_shifter_a_.Process(buffer_[1]);
+    buffer_[1] = frequency_shifter_b_.Process(buffer_[1]);
 
     panner_a_.Process(buffer_[0], &buffer_[2]);
     panner_b_.Process(buffer_[1], &buffer_[4]);
@@ -33,7 +33,7 @@ public:
     buffer_[0] = crossfader_.Process(buffer_[2], buffer_[4]);
     buffer_[1] = crossfader_.Process(buffer_[3], buffer_[5]);
 
-    // reverb_.Process(buffer_[0], buffer_[1], &buffer_[2], &buffer_[3]);
+    reverb_.Process(buffer_[0], buffer_[1], &buffer_[0], &buffer_[1]);
 
     feedback_[0] = buffer_[0];
     feedback_[1] = buffer_[1];
@@ -44,15 +44,15 @@ public:
 
   void SetFrequencyShifterA(float value) {
     int sign = (0.f < value) - (value < 0.f);
-    float scale = powf((value - 0.5) * 2.f, 2.f);
-    float frequency = 100.f * sign * scale;
+    float scale = powf((value - 0.5) * 4.f, 2.f);
+    float frequency = 500.f * (float)sign * scale;
     frequency_shifter_a_.SetFrequency(frequency);
   }
 
   void SetFrequencyShifterB(float value) {
     int sign = (0.f < value) - (value < 0.f);
-    float scale = powf((value - 0.5) * 2.f, 2.f);
-    float frequency = 100.f * sign * scale;
+    float scale = powf((value - 0.5) * 4.f, 2.f);
+    float frequency = 500.f * (float)sign * scale;
     frequency_shifter_b_.SetFrequency(frequency);
   }
 
@@ -60,7 +60,10 @@ public:
 
   void SetPannerB(float value) { panner_b_.SetPos(value); }
 
-  void SetReverb(float value) {}
+  void SetReverb(float value) {
+    float scale = powf((value - 0.5) * 4.f, 2.f);
+    reverb_.SetFeedback(scale);
+  }
 
   void SetCrossfader(float value) { crossfader_.SetPos(value); }
 

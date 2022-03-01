@@ -2,12 +2,12 @@
 Language:        Cpp
 # BasedOnStyle:  LLVM
 AccessModifierOffset: -2
-AlignAfterOpenBracket: Align
+AlignAfterOpenBracket: BlockIndent
 AlignArrayOfStructures: None
 AlignConsecutiveMacros: None
-AlignConsecutiveAssignments: None
+AlignConsecutiveAssignments: Consecutive
 AlignConsecutiveBitFields: None
-AlignConsecutiveDeclarations: None
+AlignConsecutiveDeclarations: Consecutive
 AlignEscapedNewlines: Right
 AlignOperands:   Align
 AlignTrailingComments: true

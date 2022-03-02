@@ -7,10 +7,23 @@ daisy::DaisyVersio hw;
 
 Lhowon lhowon;
 
+// static bool blink = false;
+
 void callback(
     daisy::AudioHandle::InterleavingInputBuffer  in,
     daisy::AudioHandle::InterleavingOutputBuffer out, size_t size
 ) {
+  hw.ProcessAnalogControls();
+  lhowon.Update(
+      hw.GetKnobValue(daisy::DaisyVersio::KNOB_0), // pan A
+      hw.GetKnobValue(daisy::DaisyVersio::KNOB_1), // fx A
+      hw.GetKnobValue(daisy::DaisyVersio::KNOB_2), // xfade
+      hw.GetKnobValue(daisy::DaisyVersio::KNOB_3), // reverb
+      hw.GetKnobValue(daisy::DaisyVersio::KNOB_4), // pan B
+      hw.GetKnobValue(daisy::DaisyVersio::KNOB_5), // fx B
+      hw.GetKnobValue(daisy::DaisyVersio::KNOB_6), // feedback
+      hw.Gate() || hw.SwitchPressed()
+  );
   for (size_t i = 0; i < size; i += 2) {
     lhowon.Process(in[i], in[i + 1], &out[i]);
   }
@@ -23,18 +36,14 @@ int main(void) {
   hw.StartAdc();
 
   while (1) {
-    hw.ProcessAnalogControls();
-    hw.UpdateExample();
+    // hw.UpdateExample();
+    /*
+    hw.SetLed(0, blink, blink, blink);
+    hw.SetLed(1, blink, blink, blink);
+    hw.SetLed(2, blink, blink, blink);
+    hw.SetLed(3, blink, blink, blink);
+    blink = !blink;
+    */
     hw.UpdateLeds();
-    lhowon.Update(
-        hw.GetKnobValue(daisy::DaisyVersio::KNOB_0), // pan A
-        hw.GetKnobValue(daisy::DaisyVersio::KNOB_1), // fx A
-        hw.GetKnobValue(daisy::DaisyVersio::KNOB_2), // xfade
-        hw.GetKnobValue(daisy::DaisyVersio::KNOB_3), // reverb
-        hw.GetKnobValue(daisy::DaisyVersio::KNOB_4), // pan B
-        hw.GetKnobValue(daisy::DaisyVersio::KNOB_5), // fx B
-        hw.GetKnobValue(daisy::DaisyVersio::KNOB_6), // feedback
-        hw.Gate() || hw.SwitchPressed()
-    );
   }
 }

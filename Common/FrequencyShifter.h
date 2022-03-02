@@ -10,9 +10,9 @@ public:
   FrequencyShifter() {}
   ~FrequencyShifter() {}
 
-  inline void Init(int sample_rate) {
-    float gamma_const = (15.0 * PI_F) / sample_rate;
-    float gamma[12]   = {
+  inline void Init(float sample_rate) {
+    double gamma_const = (15.0 * PI_F) / sample_rate;
+    double gamma[12]   = {
           gamma_const * 0.3609f,   gamma_const * 2.7412f,
           gamma_const * 11.1573f,  gamma_const * 44.7581f,
           gamma_const * 179.6242f, gamma_const * 798.4578f,
@@ -30,27 +30,22 @@ public:
   }
 
   float Process(float in) {
-    float y1[12];
     float ay[12];
     float y0[12];
-    // Store previous filter output
-    // Is this actually necessary?
-    for (int i = 0; i < 12; ++i) {
-      y1[i] = y1_[i];
-    }
     // Run Hilbert filter
     for (int i = 0; i < 12; ++i) {
-      y0[i] = in - (coefs_[i]) * y1[i];
-      ay[i] = coefs_[i] * y0[i] + 1 * y1[i];
-      y1[i] = y0[i];
-      in    = ay[i]; // ay[i] becomes the input of the next loop
-    }
-    // Store current filter output
-    for (int i = 0; i < 12; ++i) {
-      y1_[i] = y1[i];
+      y0[i]  = in - coefs_[i] * y1_[i];
+      ay[i]  = coefs_[i] * y0[i] + 1.f * y1_[i];
+      y1_[i] = y0[i];
+      in     = ay[i]; // ay[i] becomes the input of the next loop
     }
     // Increment phase
     phase_ += frequency_ * TWOPI_F / sample_rate_;
+    if (phase > TWOPI_F) {
+        phase -= TWOPI_F;
+    } else if (phase < 0.f) {
+        phase += TWOPI_F;
+    }
     // Output
     return (ay[5] * cosf(phase_)) + (ay[11] * sinf(phase_));
   }
@@ -58,11 +53,11 @@ public:
   inline void SetFrequency(float frequency) { frequency_ = frequency; }
 
 private:
-  float coefs_[12];
-  float phase_;
-  float frequency_;
-  float y1_[12];
-  int   sample_rate_;
+  double coefs_[12];
+  float  phase_;
+  float  frequency_;
+  float  y1_[12];
+  float  sample_rate_;
 };
 
 } // namespace planetbosch

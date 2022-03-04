@@ -24,9 +24,9 @@ public:
     phase_ += frequency_ * TWOPI_F / sample_rate_;
     // wrap the phase to avoid losing precision
     if (phase_ > TWOPI_F) {
-        phase_ -= TWOPI_F;
+      phase_ -= TWOPI_F;
     } else {
-        phase_ += TWOPI_F;
+      phase_ += TWOPI_F;
     }
     return (out[0] * cosf(phase_)) + (out[1] * sinf(phase_));
   }

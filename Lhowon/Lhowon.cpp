@@ -1,4 +1,5 @@
 #include "daisysp.h"
+#include "diffuser.h"
 #include "frequency_shifter.h"
 #include "panner.h"
 
@@ -8,13 +9,14 @@ public:
   ~Lhowon() {}
 
   void Init(float sample_rate) {
+    crossfade_.Init(daisysp::CROSSFADE_CPOW);
+    diffuser_a_.Init(sample_rate);
+    diffuser_b_.Init(sample_rate);
     feedback_value_ = 0.f;
-    panner_a_.Init();
-    panner_b_.Init();
-    reverb_.Init(sample_rate);
     frequency_shifter_a_.Init(sample_rate);
     frequency_shifter_b_.Init(sample_rate);
-    crossfade_.Init(daisysp::CROSSFADE_CPOW);
+    panner_a_.Init();
+    panner_b_.Init();
     slew_coeff_ = 0.05f;
   }
 
@@ -29,7 +31,8 @@ public:
     panner_b_.Process(buffer_[1], &buffer_[4]);
     buffer_[0] = crossfade_.Process(buffer_[2], buffer_[4]);
     buffer_[1] = crossfade_.Process(buffer_[3], buffer_[5]);
-    reverb_.Process(buffer_[0], buffer_[1], &buffer_[0], &buffer_[1]);
+    buffer_[0] = diffuser_a_.Process(buffer_[0]);
+    buffer_[1] = diffuser_a_.Process(buffer_[1]);
     feedback_[0] = buffer_[0];
     feedback_[1] = buffer_[1];
     out[0]       = buffer_[0];
@@ -55,8 +58,17 @@ public:
   void SetPannerB(float value) { panner_b_.SetPos(value); }
 
   void SetReverb(float value) {
-    float scale = abs(value - 0.5) * 1.99;
-    reverb_.SetFeedback(scale);
+      float time;
+      float amount = abs((value - 0.5f) * 2.0f);
+      if (value > 0.5) {
+          time = (value - 0.5f) * 2.0f;
+      } else {
+          time = (0.5f - value) * 2.0f;
+      }
+      diffuser_a_.SetAmount(amount);
+      diffuser_b_.SetAmount(amount);
+      diffuser_a_.SetTime(time);
+      diffuser_b_.SetTime(time);
   }
 
   void SetCrossfader(float value) { crossfade_.SetPos(value); }
@@ -71,16 +83,8 @@ public:
       float feedback_value,  // knob 6
       bool  muted            // gate
   ) {
-    // Slew all CV inputs
-    daisysp::fonepole(crossfade_value_, crossfade_value, slew_coeff_);
-    // daisysp::fonepole(fx_a_value_, fx_a_value, slew_coeff_);
-    // daisysp::fonepole(fx_b_value_, fx_b_value, slew_coeff_);
     fx_a_value_ = fx_a_value;
     fx_b_value_ = fx_b_value;
-    daisysp::fonepole(panner_a_value_, panner_a_value, slew_coeff_);
-    daisysp::fonepole(panner_b_value_, panner_b_value, slew_coeff_);
-    daisysp::fonepole(reverb_value_, reverb_value, slew_coeff_);
-    daisysp::fonepole(feedback_value_, feedback_value * -0.999f, slew_coeff_);
     SetPannerA(panner_a_value_);
     SetPannerB(panner_b_value_);
     SetCrossfader(crossfade_value_);
@@ -93,7 +97,6 @@ public:
 private:
   bool                          muted_;
   daisysp::CrossFade            crossfade_;
-  daisysp::ReverbSc             reverb_;
   float                         buffer_[8];
   float                         crossfade_value_;
   float                         feedback_[2];
@@ -104,6 +107,8 @@ private:
   float                         panner_b_value_;
   float                         reverb_value_;
   float                         slew_coeff_;
+  planetbosch::Diffuser         diffuser_a_;
+  planetbosch::Diffuser         diffuser_b_;
   planetbosch::FrequencyShifter frequency_shifter_a_;
   planetbosch::FrequencyShifter frequency_shifter_b_;
   planetbosch::Panner           panner_a_;

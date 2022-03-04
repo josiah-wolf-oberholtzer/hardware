@@ -21,7 +21,6 @@ public:
   void Process(float in_1, float in_2, float *out) {
     buffer_[0] =
         daisysp::SoftClip((in_1 * !muted_) + (feedback_[0] * feedback_value_));
-
     buffer_[1] =
         daisysp::SoftClip((in_2 * !muted_) + (feedback_[1] * feedback_value_));
     buffer_[0] = frequency_shifter_a_.Process(buffer_[0]);
@@ -38,23 +37,17 @@ public:
   }
 
   void SetFrequencyShifterA(float value) {
-    /*
     int   sign      = (0.f < value) - (value < 0.f);
     float scale     = powf((value - 0.5) * 2.f, 2.f);
     float frequency = 1000.f * (float)sign * scale;
     frequency_shifter_a_.SetFrequency(frequency);
-    */
-    frequency_shifter_a_.SetFrequency(value * 1000.0f);
   }
 
   void SetFrequencyShifterB(float value) {
-    /*
     int   sign      = (0.f < value) - (value < 0.f);
     float scale     = powf((value - 0.5) * 2.f, 2.f);
     float frequency = 1000.f * (float)sign * scale;
     frequency_shifter_b_.SetFrequency(frequency);
-    */
-    frequency_shifter_b_.SetFrequency(value * 1000.0f);
   }
 
   void SetPannerA(float value) { panner_a_.SetPos(value); }
@@ -87,7 +80,7 @@ public:
     daisysp::fonepole(panner_a_value_, panner_a_value, slew_coeff_);
     daisysp::fonepole(panner_b_value_, panner_b_value, slew_coeff_);
     daisysp::fonepole(reverb_value_, reverb_value, slew_coeff_);
-    daisysp::fonepole(feedback_value_, feedback_value * -0.5f, slew_coeff_);
+    daisysp::fonepole(feedback_value_, feedback_value * -0.999f, slew_coeff_);
     SetPannerA(panner_a_value_);
     SetPannerB(panner_b_value_);
     SetCrossfader(crossfade_value_);

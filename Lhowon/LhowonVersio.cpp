@@ -7,8 +7,6 @@ daisy::DaisyVersio hw;
 
 Lhowon lhowon;
 
-// static bool blink = false;
-
 void callback(
     daisy::AudioHandle::InterleavingInputBuffer  in,
     daisy::AudioHandle::InterleavingOutputBuffer out, size_t size
@@ -36,14 +34,7 @@ int main(void) {
   hw.StartAdc();
 
   while (1) {
-    // hw.UpdateExample();
-    /*
-    hw.SetLed(0, blink, blink, blink);
-    hw.SetLed(1, blink, blink, blink);
-    hw.SetLed(2, blink, blink, blink);
-    hw.SetLed(3, blink, blink, blink);
-    blink = !blink;
-    */
+    hw.UpdateExample();
     hw.UpdateLeds();
   }
 }

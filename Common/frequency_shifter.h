@@ -1,5 +1,5 @@
-#include "Hilbert.h"
 #include "daisysp.h"
+#include "hilbert.h"
 #include <math.h>
 
 using namespace daisysp;

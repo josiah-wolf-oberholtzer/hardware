@@ -1,6 +1,6 @@
-#include "FrequencyShifter.h"
-#include "Panner.h"
 #include "daisysp.h"
+#include "frequency_shifter.h"
+#include "panner.h"
 
 class Lhowon {
 public:

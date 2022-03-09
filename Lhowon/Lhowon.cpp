@@ -1,7 +1,7 @@
 #include "daisysp.h"
-#include "diffuser.h"
 #include "frequency_shifter.h"
 #include "panner.h"
+#include "reverb.h"
 
 class Lhowon {
 public:
@@ -10,8 +10,8 @@ public:
 
   void Init(float sample_rate) {
     crossfade_.Init(daisysp::CROSSFADE_CPOW);
-    diffuser_a_.Init(sample_rate);
-    diffuser_b_.Init(sample_rate);
+    reverb_a_.Init();
+    reverb_b_.Init();
     feedback_value_ = 0.f;
     frequency_shifter_a_.Init(sample_rate);
     frequency_shifter_b_.Init(sample_rate);
@@ -29,10 +29,10 @@ public:
     buffer_[1] = frequency_shifter_b_.Process(buffer_[1]);
     panner_a_.Process(buffer_[0], &buffer_[2]);
     panner_b_.Process(buffer_[1], &buffer_[4]);
-    buffer_[0] = crossfade_.Process(buffer_[2], buffer_[4]);
-    buffer_[1] = crossfade_.Process(buffer_[3], buffer_[5]);
-    buffer_[0] = diffuser_a_.Process(buffer_[0]);
-    buffer_[1] = diffuser_a_.Process(buffer_[1]);
+    buffer_[0]   = crossfade_.Process(buffer_[2], buffer_[4]);
+    buffer_[1]   = crossfade_.Process(buffer_[3], buffer_[5]);
+    buffer_[0]   = reverb_a_.Process(buffer_[0]);
+    buffer_[1]   = reverb_a_.Process(buffer_[1]);
     feedback_[0] = buffer_[0];
     feedback_[1] = buffer_[1];
     out[0]       = buffer_[0];
@@ -58,17 +58,17 @@ public:
   void SetPannerB(float value) { panner_b_.SetPos(value); }
 
   void SetReverb(float value) {
-      float time;
-      float amount = abs((value - 0.5f) * 2.0f);
-      if (value > 0.5) {
-          time = (value - 0.5f) * 2.0f;
-      } else {
-          time = (0.5f - value) * 2.0f;
-      }
-      diffuser_a_.SetAmount(amount);
-      diffuser_b_.SetAmount(amount);
-      diffuser_a_.SetTime(time);
-      diffuser_b_.SetTime(time);
+    float time;
+    float amount = abs((value - 0.5f) * 2.0f);
+    if (value > 0.5) {
+      time = (value - 0.5f) * 2.0f;
+    } else {
+      time = (0.5f - value) * 2.0f;
+    }
+    reverb_a_.SetAmount(amount);
+    reverb_b_.SetAmount(amount);
+    reverb_a_.SetTime(time);
+    reverb_b_.SetTime(time);
   }
 
   void SetCrossfader(float value) { crossfade_.SetPos(value); }
@@ -107,10 +107,10 @@ private:
   float                         panner_b_value_;
   float                         reverb_value_;
   float                         slew_coeff_;
-  planetbosch::Diffuser         diffuser_a_;
-  planetbosch::Diffuser         diffuser_b_;
   planetbosch::FrequencyShifter frequency_shifter_a_;
   planetbosch::FrequencyShifter frequency_shifter_b_;
   planetbosch::Panner           panner_a_;
   planetbosch::Panner           panner_b_;
+  planetbosch::Reverb           reverb_a_;
+  planetbosch::Reverb           reverb_b_;
 };

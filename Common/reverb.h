@@ -37,7 +37,7 @@ public:
   Reverb() {}
   ~Reverb() {}
 
-  void Init(uint16_t *buffer) {
+  void Init(float *buffer) {
     engine_.Init(buffer);
     engine_.SetLFOFrequency(LFO_1, 0.5f / 32000.0f);
     engine_.SetLFOFrequency(LFO_2, 0.3f / 32000.0f);
@@ -86,13 +86,13 @@ public:
     c.Read(in, gain);
 
     // Diffuse through 4 allpasses.
-    c.Read(ap1 TAIL, kap);
+    c.Read(ap1, -1, kap);
     c.WriteAllPass(ap1, -kap);
-    c.Read(ap2 TAIL, kap);
+    c.Read(ap2, -1, kap);
     c.WriteAllPass(ap2, -kap);
-    c.Read(ap3 TAIL, kap);
+    c.Read(ap3, -1, kap);
     c.WriteAllPass(ap3, -kap);
-    c.Read(ap4 TAIL, kap);
+    c.Read(ap4, -1, kap);
     c.WriteAllPass(ap4, -kap);
     c.Write(apout);
 
@@ -100,9 +100,9 @@ public:
     c.Load(apout);
     c.Interpolate(del1, 4680.0f, LFO_2, 100.0f, krt);
     c.Lp(lp_1, klp);
-    c.Read(dap1a TAIL, -kap);
+    c.Read(dap1a, -1, -kap);
     c.WriteAllPass(dap1a, kap);
-    c.Read(dap1b TAIL, kap);
+    c.Read(dap1b, -1, kap);
     c.WriteAllPass(dap1b, -kap);
     c.Write(del1, 2.0f);
     c.Write(wet, 0.0f);
@@ -123,15 +123,14 @@ public:
   inline void SetLp(float lp) { lp_ = lp; }
 
 private:
-  typedef FxEngine<16384, FORMAT_12_BIT> E;
-  E                                      engine_;
-
-  float amount_;
-  float input_gain_;
-  float reverb_time_;
-  float diffusion_;
-  float lp_;
-  float lp_decay_1_;
+  float                   amount_;
+  float                   diffusion_;
+  float                   input_gain_;
+  float                   lp_;
+  float                   lp_decay_1_;
+  float                   reverb_time_;
+  typedef FxEngine<16384> E;
+  E                       engine_;
 };
 
 } // namespace planetbosch

@@ -31,57 +31,14 @@
 
 using namespace daisysp;
 
-#define TAIL , -1
-
-enum Format { FORMAT_12_BIT, FORMAT_16_BIT, FORMAT_32_BIT };
-
 enum LFOIndex { LFO_1, LFO_2 };
 
-template <Format format> struct DataType {};
-
-template <> struct DataType<FORMAT_12_BIT> {
-  typedef uint16_t T;
-
-  static inline float Decompress(T value) {
-    return static_cast<float>(static_cast<int16_t>(value)) / 4096.0f;
-  }
-
-  static inline T Compress(float value) {
-    return static_cast<uint16_t>(Clip16(static_cast<int32_t>(value * 4096.0f)));
-  }
-};
-
-template <> struct DataType<FORMAT_16_BIT> {
-  typedef uint16_t T;
-
-  static inline float Decompress(T value) {
-    return static_cast<float>(static_cast<int16_t>(value)) / 32768.0f;
-  }
-
-  static inline T Compress(float value) {
-    return static_cast<uint16_t>(Clip16(static_cast<int32_t>(value * 32768.0f))
-    );
-  }
-};
-
-template <> struct DataType<FORMAT_32_BIT> {
-  typedef float T;
-
-  static inline float Decompress(T value) {
-    return value;
-    ;
-  }
-
-  static inline T Compress(float value) { return value; }
-};
-
-template <size_t size, Format format = FORMAT_12_BIT> class FxEngine {
+template <size_t size> class FxEngine {
 public:
-  typedef typename DataType<format>::T T;
   FxEngine() {}
   ~FxEngine() {}
 
-  void Init(T *buffer) {
+  void Init(float *buffer) {
     buffer_ = buffer;
     Clear();
   }
@@ -134,11 +91,10 @@ public:
 
     template <typename D> inline void Write(D &d, int32_t offset, float scale) {
       STATIC_ASSERT(D::base + D::length <= size, delay_memory_full);
-      T w = DataType<format>::Compress(accumulator_);
       if (offset == -1) {
-        buffer_[(write_ptr_ + D::base + D::length - 1) & MASK] = w;
+        buffer_[(write_ptr_ + D::base + D::length - 1) & MASK] = accumulator_;
       } else {
-        buffer_[(write_ptr_ + D::base + offset) & MASK] = w;
+        buffer_[(write_ptr_ + D::base + offset) & MASK] = accumulator_;
       }
       accumulator_ *= scale;
     }
@@ -159,15 +115,14 @@ public:
 
     template <typename D> inline void Read(D &d, int32_t offset, float scale) {
       STATIC_ASSERT(D::base + D::length <= size, delay_memory_full);
-      T r;
+      float r;
       if (offset == -1) {
         r = buffer_[(write_ptr_ + D::base + D::length - 1) & MASK];
       } else {
         r = buffer_[(write_ptr_ + D::base + offset) & MASK];
       }
-      float r_f      = DataType<format>::Decompress(r);
-      previous_read_ = r_f;
-      accumulator_ += r_f * scale;
+      previous_read_ = r;
+      accumulator_ += r * scale;
     }
 
     template <typename D> inline void Read(D &d, float scale) {
@@ -188,13 +143,9 @@ public:
     inline void Interpolate(D &d, float offset, float scale) {
       STATIC_ASSERT(D::base + D::length <= size, delay_memory_full);
       MAKE_INTEGRAL_FRACTIONAL(offset);
-      float a = DataType<format>::Decompress(
-          buffer_[(write_ptr_ + offset_integral + D::base) & MASK]
-      );
-      float b = DataType<format>::Decompress(
-          buffer_[(write_ptr_ + offset_integral + D::base + 1) & MASK]
-      );
-      float x        = a + (b - a) * offset_fractional;
+      float a = buffer_[(write_ptr_ + offset_integral + D::base) & MASK];
+      float b = buffer_[(write_ptr_ + offset_integral + D::base + 1) & MASK];
+      float x = a + (b - a) * offset_fractional;
       previous_read_ = x;
       accumulator_ += x * scale;
     }
@@ -206,13 +157,9 @@ public:
       STATIC_ASSERT(D::base + D::length <= size, delay_memory_full);
       offset += amplitude * lfo_value_[index];
       MAKE_INTEGRAL_FRACTIONAL(offset);
-      float a = DataType<format>::Decompress(
-          buffer_[(write_ptr_ + offset_integral + D::base) & MASK]
-      );
-      float b = DataType<format>::Decompress(
-          buffer_[(write_ptr_ + offset_integral + D::base + 1) & MASK]
-      );
-      float x        = a + (b - a) * offset_fractional;
+      float a = buffer_[(write_ptr_ + offset_integral + D::base) & MASK];
+      float b = buffer_[(write_ptr_ + offset_integral + D::base + 1) & MASK];
+      float x = a + (b - a) * offset_fractional;
       previous_read_ = x;
       accumulator_ += x * scale;
     }
@@ -221,7 +168,7 @@ public:
     float   accumulator_;
     float   previous_read_;
     float   lfo_value_[2];
-    T      *buffer_;
+    float  *buffer_;
     int32_t write_ptr_;
   };
 
@@ -251,6 +198,6 @@ private:
   enum { MASK = size - 1 };
 
   int32_t          write_ptr_;
-  T               *buffer_;
+  float           *buffer_;
   CosineOscillator lfo_[2];
 };

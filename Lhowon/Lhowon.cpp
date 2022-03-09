@@ -10,8 +10,8 @@ public:
 
   void Init(float sample_rate) {
     crossfade_.Init(daisysp::CROSSFADE_CPOW);
-    reverb_a_.Init();
-    reverb_b_.Init();
+    reverb_a_.Init(fx_buffer_);
+    reverb_b_.Init(fx_buffer_);
     feedback_value_ = 0.f;
     frequency_shifter_a_.Init(sample_rate);
     frequency_shifter_b_.Init(sample_rate);
@@ -107,6 +107,8 @@ private:
   float                         panner_b_value_;
   float                         reverb_value_;
   float                         slew_coeff_;
+  float                        *fx_buffer_;
+  uint                          fx_buffer_size_;
   planetbosch::FrequencyShifter frequency_shifter_a_;
   planetbosch::FrequencyShifter frequency_shifter_b_;
   planetbosch::Panner           panner_a_;

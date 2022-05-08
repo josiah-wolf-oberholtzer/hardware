@@ -24,26 +24,6 @@ using namespace daisysp;
     var = (max);                                                               \
   }
 
-#define JOIN(lhs, rhs) JOIN_1(lhs, rhs)
-#define JOIN_1(lhs, rhs) JOIN_2(lhs, rhs)
-#define JOIN_2(lhs, rhs) lhs##rhs
-
-#define STATIC_ASSERT(expression, message)                                     \
-  struct JOIN(__static_assertion_at_line_, __LINE__) {                         \
-    impl::StaticAssertion<static_cast<bool>((expression))> JOIN(               \
-        JOIN(JOIN(STATIC_ASSERTION_FAILED_AT_LINE_, __LINE__), _), message     \
-    );                                                                         \
-  };
-
-namespace impl {
-template <bool> struct StaticAssertion;
-
-template <> struct StaticAssertion<true> {}; // StaticAssertion<true>
-
-template <int i> struct StaticAssertionTest {}; // StaticAssertionTest<int>
-
-} // namespace impl
-
 template <uint32_t a, uint32_t b, uint32_t c, uint32_t d> struct FourCC {
   static const uint32_t value = (((((d << 8) | c) << 8) | b) << 8) | a;
 };
@@ -53,8 +33,7 @@ public:
   CosineOscillator() {}
   ~CosineOscillator() {}
 
-  void Init(float freq) {
-    float sample_rate = 48000; // hardcoded for now
+  void Init(float freq, float sample_rate) {
     phs_inc_          = freq / sample_rate;
   }
 
@@ -65,7 +44,7 @@ public:
       phs_ -= 1.f;
     }
 
-    value_ = cos(phs_);
+    value_ = cos(phs_ * TWOPI_F);
 
     return value_;
   }

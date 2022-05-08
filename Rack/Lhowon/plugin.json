@@ -1,0 +1,23 @@
+{
+  "slug": "Lhowon",
+  "name": "Lhowon",
+  "version": "2.0.0",
+  "license": "proprietary",
+  "brand": "Lhowon",
+  "author": "",
+  "authorEmail": "",
+  "authorUrl": "",
+  "pluginUrl": "",
+  "manualUrl": "",
+  "sourceUrl": "",
+  "donateUrl": "",
+  "changelogUrl": "",
+  "modules": [
+    {
+      "slug": "Lhowon",
+      "name": "Lhowon",
+      "description": "",
+      "tags": []
+    }
+  ]
+}

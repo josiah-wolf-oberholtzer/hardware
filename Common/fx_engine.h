@@ -38,7 +38,7 @@ public:
   FxEngine() {}
   ~FxEngine() {}
 
-  void Init(float *buffer) {
+  void Init(float *buffer, float sample_rate) {
     buffer_ = buffer;
     Clear();
   }
@@ -90,7 +90,6 @@ public:
     }
 
     template <typename D> inline void Write(D &d, int32_t offset, float scale) {
-      STATIC_ASSERT(D::base + D::length <= size, delay_memory_full);
       if (offset == -1) {
         buffer_[(write_ptr_ + D::base + D::length - 1) & MASK] = accumulator_;
       } else {
@@ -114,7 +113,6 @@ public:
     }
 
     template <typename D> inline void Read(D &d, int32_t offset, float scale) {
-      STATIC_ASSERT(D::base + D::length <= size, delay_memory_full);
       float r;
       if (offset == -1) {
         r = buffer_[(write_ptr_ + D::base + D::length - 1) & MASK];
@@ -141,7 +139,6 @@ public:
 
     template <typename D>
     inline void Interpolate(D &d, float offset, float scale) {
-      STATIC_ASSERT(D::base + D::length <= size, delay_memory_full);
       MAKE_INTEGRAL_FRACTIONAL(offset);
       float a = buffer_[(write_ptr_ + offset_integral + D::base) & MASK];
       float b = buffer_[(write_ptr_ + offset_integral + D::base + 1) & MASK];
@@ -154,7 +151,6 @@ public:
     inline void Interpolate(
         D &d, float offset, LFOIndex index, float amplitude, float scale
     ) {
-      STATIC_ASSERT(D::base + D::length <= size, delay_memory_full);
       offset += amplitude * lfo_value_[index];
       MAKE_INTEGRAL_FRACTIONAL(offset);
       float a = buffer_[(write_ptr_ + offset_integral + D::base) & MASK];
@@ -172,8 +168,8 @@ public:
     int32_t write_ptr_;
   };
 
-  inline void SetLFOFrequency(LFOIndex index, float frequency) {
-    lfo_[index].Init(frequency * 32.0f);
+  inline void SetLFOFrequency(LFOIndex index, float frequency, float sample_rate) {
+    lfo_[index].Init(frequency * 32.0f, sample_rate);
   }
 
   inline void Start(Context *c) {

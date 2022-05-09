@@ -30,16 +30,16 @@ jobs:
     - name: Cache libDaisy build
       uses: actions/cache@v2
       with:
-        path: ./libDaisy/build
+        path: ./Vendor/libDaisy/build
         key: ${{ runner.os }}-libDaisy
     - name: Cache DaisySP build
       uses: actions/cache@v2
       with:
-        path: ./DaisySP/build
+        path: ./Vendor/DaisySP/build
         key: ${{ runner.os }}-DaisySP
     - name: Build libDaisy
-      run: make -C libDaisy
+      run: make -C Vendor/libDaisy
     - name: Build DaisySP
-      run: make -C DaisySP
+      run: make -C Vendor/DaisySP
     - name: Build Lhowon
       run: make -C Versio/Lhowon

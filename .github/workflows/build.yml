@@ -1,5 +1,8 @@
 name: Build all
 
+env:
+  RACK_DIR: Rack-SDK
+
 on:
   push:
     branches: [main]
@@ -7,7 +10,21 @@ on:
     branches: [main]
 
 jobs:
-  build:
+
+  vcvrack:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        submodules: 'recursive'
+    - uses: actions/checkout@v2
+      with:
+        path: Rack-SDK
+        repository: VCVRack/Rack
+    - name: Build plugin
+      run: make -C Rack/ all
+
+  versio:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
@@ -32,4 +49,4 @@ jobs:
     - name: Build DaisySP
       run: make -C DaisySP
     - name: Build Lhowon
-      run: make -C Lhowon
+      run: make -C Versio/Lhowon

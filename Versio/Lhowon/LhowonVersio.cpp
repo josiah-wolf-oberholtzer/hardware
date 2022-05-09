@@ -1,4 +1,4 @@
-#include "Lhowon.cpp"
+#include "Lhowon.h"
 #include "daisy_versio.h"
 #include "daisysp.h"
 #include <string>

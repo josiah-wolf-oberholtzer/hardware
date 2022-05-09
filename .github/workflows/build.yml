@@ -1,8 +1,5 @@
 name: Build all
 
-env:
-  RACK_DIR: Rack-SDK
-
 on:
   push:
     branches: [main]
@@ -17,10 +14,6 @@ jobs:
     - uses: actions/checkout@v2
       with:
         submodules: 'recursive'
-    - uses: actions/checkout@v2
-      with:
-        path: Rack-SDK
-        repository: VCVRack/Rack
     - name: Build plugin
       run: make -C Rack/ all
 

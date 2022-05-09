@@ -1,6 +1,9 @@
 [submodule "DaisySP"]
-	path = DaisySP
+	path = Vendor/DaisySP
 	url = https://github.com/electro-smith/DaisySP
 [submodule "libDaisy"]
-	path = libDaisy
+	path = Vendor/libDaisy
 	url = https://github.com/electro-smith/libDaisy
+[submodule "Vendor/Rack"]
+	path = Vendor/Rack
+	url = https://github.com/VCVRack/Rack.git

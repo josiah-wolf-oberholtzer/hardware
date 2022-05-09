@@ -2,7 +2,7 @@
 RACK_DIR ?= ../Vendor/Rack
 
 # FLAGS will be passed to both the C and C++ compiler
-FLAGS += -I../Common/ -I../DaisySP/Source/
+FLAGS += -I../Common/ -I../Vendor/DaisySP/Source/
 CFLAGS +=
 CXXFLAGS +=
 

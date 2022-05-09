@@ -1,4 +1,3 @@
-#include "daisysp.h"
 #include <math.h>
 
 namespace planetbosch {

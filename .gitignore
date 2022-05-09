@@ -36,3 +36,9 @@
 
 # OSX
 .DS_Store
+
+*.bin
+*.elf
+*.hex
+*.lst
+*.map

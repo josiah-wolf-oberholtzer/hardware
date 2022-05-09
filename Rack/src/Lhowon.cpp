@@ -1,5 +1,5 @@
 #include "plugin.hpp"
-
+#include "Lhowon.h"
 
 const float SCALE = 3.77953;
 
@@ -7,21 +7,22 @@ inline math::Vec mm2pxZ(math::Vec mm) {
 	return mm.mult(SVG_DPI / MM_PER_IN / SCALE);
 }
 
-
 struct Lhowon : Module {
+
 	enum ParamId {
 		KNOB_1_PARAM,
-		KNOB_5_PARAM,
-		KNOB_3_PARAM,
 		KNOB_2_PARAM,
-		KNOB_6_PARAM,
+		KNOB_3_PARAM,
 		KNOB_4_PARAM,
-		SWITCH_ABC_PARAM,
+		KNOB_5_PARAM,
+		KNOB_6_PARAM,
 		KNOB_7_PARAM,
-		SWITCH_XYZ_PARAM,
 		BUTTON_FSU_PARAM,
+		SWITCH_ABC_PARAM,
+		SWITCH_XYZ_PARAM,
 		PARAMS_LEN
 	};
+        
 	enum InputId {
 		CV_1_INPUT,
 		CV_3_INPUT,
@@ -35,11 +36,13 @@ struct Lhowon : Module {
 		IN_2_INPUT,
 		INPUTS_LEN
 	};
+    
 	enum OutputId {
 		OUT_1_OUTPUT,
 		OUT_2_OUTPUT,
 		OUTPUTS_LEN
 	};
+
 	enum LightId {
 		LIGHT_1_LIGHT,
 		LIGHT_2_LIGHT,
@@ -48,7 +51,13 @@ struct Lhowon : Module {
 		LIGHTS_LEN
 	};
 
+    planetbosch::Lhowon core;  
+    //SchmittTrigger schmittTrigger;
+    float in[2];
+    float out[2];
+
 	Lhowon() {
+        core.Init(48000.f);
 		config(PARAMS_LEN, INPUTS_LEN, OUTPUTS_LEN, LIGHTS_LEN);
 		configInput(CV_1_INPUT, "CV 1");
 		configInput(CV_2_INPUT, "CV 2");
@@ -75,6 +84,26 @@ struct Lhowon : Module {
 	}
 
 	void process(const ProcessArgs& args) override {
+        in[0] = inputs[IN_1_INPUT].getVoltage() / 5.f;
+        if (inputs[IN_2_INPUT].isConnected()) {
+            in[1] = inputs[IN_2_INPUT].getVoltage() / 5.f;
+        } else {
+            in[1] = in[0];
+        }
+        core.Update(
+            clamp((inputs[CV_1_INPUT].getVoltage() / 10.f) + params[KNOB_1_PARAM].getValue(), 0.f, 1.f),
+            clamp((inputs[CV_2_INPUT].getVoltage() / 10.f) + params[KNOB_2_PARAM].getValue(), 0.f, 1.f),
+            clamp((inputs[CV_3_INPUT].getVoltage() / 10.f) + params[KNOB_3_PARAM].getValue(), 0.f, 1.f),
+            clamp((inputs[CV_4_INPUT].getVoltage() / 10.f) + params[KNOB_4_PARAM].getValue(), 0.f, 1.f),
+            clamp((inputs[CV_5_INPUT].getVoltage() / 10.f) + params[KNOB_5_PARAM].getValue(), 0.f, 1.f),
+            clamp((inputs[CV_6_INPUT].getVoltage() / 10.f) + params[KNOB_6_PARAM].getValue(), 0.f, 1.f),
+            clamp((inputs[CV_7_INPUT].getVoltage() / 10.f) + params[KNOB_7_PARAM].getValue(), 0.f, 1.f),
+            false
+            //schmittTrigger.process((inputs[CV_FSU_INPUT].getVoltage() / 10.f) + params[BUTTON_FSU_PARAM].getValue());
+        );
+        core.Process(in[0], in[1], out);
+        outputs[OUT_1_OUTPUT].setVoltage(out[0] * 5.f);
+        outputs[OUT_2_OUTPUT].setVoltage(out[1] * 5.f);
 	}
 };
 

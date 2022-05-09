@@ -1,4 +1,7 @@
-#include "daisysp.h"
+#ifndef PLANETBOSCH_PANNER
+#define PLANETBOSCH_PANNER
+
+#include "DSP.h"
 #include <math.h>
 
 namespace planetbosch {
@@ -22,3 +25,5 @@ private:
 };
 
 } // namespace planetbosch
+
+#endif

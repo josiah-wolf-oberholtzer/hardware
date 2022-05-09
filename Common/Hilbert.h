@@ -1,3 +1,6 @@
+#ifndef PLANETBOSCH_HILBERT
+#define PLANETBOSCH_HILBERT
+
 #include <math.h>
 
 namespace planetbosch {
@@ -55,3 +58,5 @@ private:
 };
 
 } // namespace planetbosch
+
+#endif

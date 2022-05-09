@@ -1,4 +1,8 @@
-#include "hilbert.h"
+#ifndef PLANETBOSCH_FREQUENCY_SHIFTER
+#define PLANETBOSCH_FREQUENCY_SHIFTER
+
+#include "DSP.h"
+#include "Hilbert.h"
 #include <math.h>
 
 namespace planetbosch {
@@ -38,3 +42,5 @@ private:
 };
 
 } // namespace planetbosch
+
+#endif

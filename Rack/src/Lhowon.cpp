@@ -1,5 +1,6 @@
-#include "plugin.hpp"
+#include "DSP.h"
 #include "Lhowon.h"
+#include "plugin.hpp"
 
 const float SCALE = 3.77953;
 
@@ -52,9 +53,7 @@ struct Lhowon : Module {
 	};
 
     planetbosch::Lhowon core;  
-    //SchmittTrigger schmittTrigger;
-    float in[2];
-    float out[2];
+    planetbosch::FloatFrame frame;
 
 	Lhowon() {
         core.Init(48000.f);
@@ -72,38 +71,39 @@ struct Lhowon : Module {
 		configOutput(OUT_1_OUTPUT, "1");
 		configOutput(OUT_2_OUTPUT, "2");
 		configButton(BUTTON_FSU_PARAM);
-		configParam(KNOB_1_PARAM, 0.f, 1.f, 0.f, "1");
-		configParam(KNOB_2_PARAM, 0.f, 1.f, 0.f, "2");
-		configParam(KNOB_3_PARAM, 0.f, 1.f, 0.f, "3");
-		configParam(KNOB_4_PARAM, 0.f, 1.f, 0.f, "4");
-		configParam(KNOB_5_PARAM, 0.f, 1.f, 0.f, "5");
-		configParam(KNOB_6_PARAM, 0.f, 1.f, 0.f, "6");
-		configParam(KNOB_7_PARAM, 0.f, 1.f, 0.f, "7");
+		configParam(KNOB_1_PARAM, 0.f, 1.f, 0.5f, "1");
+		configParam(KNOB_2_PARAM, 0.f, 1.f, 0.5f, "2");
+		configParam(KNOB_3_PARAM, 0.f, 1.f, 0.5f, "3");
+		configParam(KNOB_4_PARAM, 0.f, 1.f, 0.5f, "4");
+		configParam(KNOB_5_PARAM, 0.f, 1.f, 0.5f, "5");
+		configParam(KNOB_6_PARAM, 0.f, 1.f, 0.5f, "6");
+		configParam(KNOB_7_PARAM, 0.f, 1.f, 0.5f, "7");
 		configSwitch(SWITCH_ABC_PARAM, -1.f, 1.f, 0.f, "ABC", {"A", "B", "C"});
 		configSwitch(SWITCH_XYZ_PARAM, -1.f, 1.f, 0.f, "XYZ", {"X", "Y", "Z"});
 	}
 
 	void process(const ProcessArgs& args) override {
-        in[0] = inputs[IN_1_INPUT].getVoltage() / 5.f;
+        frame.in[0] = inputs[IN_1_INPUT].getVoltage() / 5.f;
         if (inputs[IN_2_INPUT].isConnected()) {
-            in[1] = inputs[IN_2_INPUT].getVoltage() / 5.f;
+            frame.in[1] = inputs[IN_2_INPUT].getVoltage() / 5.f;
         } else {
-            in[1] = in[0];
+            frame.in[1] = frame.in[0];
         }
+
         core.Update(
-            clamp((inputs[CV_1_INPUT].getVoltage() / 10.f) + params[KNOB_1_PARAM].getValue(), 0.f, 1.f),
-            clamp((inputs[CV_2_INPUT].getVoltage() / 10.f) + params[KNOB_2_PARAM].getValue(), 0.f, 1.f),
-            clamp((inputs[CV_3_INPUT].getVoltage() / 10.f) + params[KNOB_3_PARAM].getValue(), 0.f, 1.f),
-            clamp((inputs[CV_4_INPUT].getVoltage() / 10.f) + params[KNOB_4_PARAM].getValue(), 0.f, 1.f),
-            clamp((inputs[CV_5_INPUT].getVoltage() / 10.f) + params[KNOB_5_PARAM].getValue(), 0.f, 1.f),
-            clamp((inputs[CV_6_INPUT].getVoltage() / 10.f) + params[KNOB_6_PARAM].getValue(), 0.f, 1.f),
-            clamp((inputs[CV_7_INPUT].getVoltage() / 10.f) + params[KNOB_7_PARAM].getValue(), 0.f, 1.f),
-            false
-            //schmittTrigger.process((inputs[CV_FSU_INPUT].getVoltage() / 10.f) + params[BUTTON_FSU_PARAM].getValue());
+            params[KNOB_1_PARAM].getValue(),     // panner a
+            params[KNOB_2_PARAM].getValue(),     // fx a
+            params[KNOB_3_PARAM].getValue(),     // xfade
+            params[KNOB_4_PARAM].getValue(),     // reverb
+            params[KNOB_5_PARAM].getValue(),     // panner b
+            params[KNOB_6_PARAM].getValue(),     // fx b
+            params[KNOB_7_PARAM].getValue(),     // feedback
+            params[BUTTON_FSU_PARAM].getValue()  // mute
         );
-        core.Process(in[0], in[1], out);
-        outputs[OUT_1_OUTPUT].setVoltage(out[0] * 5.f);
-        outputs[OUT_2_OUTPUT].setVoltage(out[1] * 5.f);
+        core.Process(&frame);
+
+        outputs[OUT_1_OUTPUT].setVoltage(frame.out[0] * 5.f);
+        outputs[OUT_2_OUTPUT].setVoltage(frame.out[1] * 5.f);
 	}
 };
 

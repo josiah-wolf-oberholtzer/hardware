@@ -7,7 +7,7 @@ public:
   ~Comb() {}
 
   void Init(float sample_rate, float *buff, size_t size) {
-j   sample_rate_   = sample_rate;
+    j sample_rate_ = sample_rate;
     rev_time_      = 3.5;
     max_size_      = size;
     max_loop_time_ = ((float)size / sample_rate_) - .01;

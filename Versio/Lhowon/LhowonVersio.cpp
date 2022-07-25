@@ -1,3 +1,4 @@
+#include "DSP.h"
 #include "Lhowon.h"
 #include "daisy_versio.h"
 #include "daisysp.h"
@@ -5,7 +6,7 @@
 
 daisy::DaisyVersio hw;
 
-Lhowon lhowon;
+planetbosch::Lhowon lhowon;
 
 void callback(
     daisy::AudioHandle::InterleavingInputBuffer  in,

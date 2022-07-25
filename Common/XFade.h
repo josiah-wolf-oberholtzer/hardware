@@ -1,8 +1,8 @@
 #ifndef PLANETBOSCH_XFADE
 #define PLANETBOSCH_XFADE
 
-#include <math.h>
 #include "DSP.h"
+#include <math.h>
 
 #define REALLYSMALLFLOAT 0.000001f
 

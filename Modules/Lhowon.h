@@ -24,20 +24,19 @@ public:
     buffer_[1] = frame->in[1];
     panner_a_.Process(buffer_[0], &buffer_[2]);
     panner_b_.Process(buffer_[1], &buffer_[4]);
-    buffer_[0]   = xfade_.Process(buffer_[2], buffer_[4]);
-    buffer_[1]   = xfade_.Process(buffer_[3], buffer_[5]);
+    buffer_[0] = xfade_.Process(buffer_[2], buffer_[4]);
+    buffer_[1] = xfade_.Process(buffer_[3], buffer_[5]);
     /*
     buffer_[1] = frame->in[1];
     buffer_[0] =
-        planetbosch::SoftClip((frame->in[0] * !muted_) + (feedback_[0] * feedback_value_));
-    buffer_[1] =
-        planetbosch::SoftClip((frame->in[1] * !muted_) + (feedback_[1] * feedback_value_));
-    buffer_[0] = frequency_shifter_a_.Process(buffer_[0]);
-    buffer_[1] = frequency_shifter_b_.Process(buffer_[1]);
-    panner_a_.Process(buffer_[0], &buffer_[2]);
-    panner_b_.Process(buffer_[1], &buffer_[4]);
-    buffer_[0]   = xfade_.Process(buffer_[2], buffer_[4]);
-    buffer_[1]   = xfade_.Process(buffer_[3], buffer_[5]);
+        planetbosch::SoftClip((frame->in[0] * !muted_) + (feedback_[0] *
+    feedback_value_)); buffer_[1] = planetbosch::SoftClip((frame->in[1] *
+    !muted_) + (feedback_[1] * feedback_value_)); buffer_[0] =
+    frequency_shifter_a_.Process(buffer_[0]); buffer_[1] =
+    frequency_shifter_b_.Process(buffer_[1]); panner_a_.Process(buffer_[0],
+    &buffer_[2]); panner_b_.Process(buffer_[1], &buffer_[4]); buffer_[0]   =
+    xfade_.Process(buffer_[2], buffer_[4]); buffer_[1]   =
+    xfade_.Process(buffer_[3], buffer_[5]);
     */
     frame->out[0] = buffer_[0];
     frame->out[1] = buffer_[1];
@@ -61,17 +60,11 @@ public:
     frequency_shifter_b_.SetFrequency(frequency);
   }
 
-  void SetPannerA(float value) { 
-    panner_a_.SetPos(value); 
-  }
+  void SetPannerA(float value) { panner_a_.SetPos(value); }
 
-  void SetPannerB(float value) { 
-    panner_b_.SetPos(value); 
-  }
+  void SetPannerB(float value) { panner_b_.SetPos(value); }
 
-  void SetXfade(float value) { 
-    xfade_.SetPos(value);
-  }
+  void SetXfade(float value) { xfade_.SetPos(value); }
 
   void Update(
       float panner_a_value, // knob 0
@@ -83,9 +76,9 @@ public:
       float feedback_value, // knob 6
       bool  muted           // gate
   ) {
-    fx_a_value_ = fx_a_value;
-    fx_b_value_ = fx_b_value;
-    muted_ = muted;
+    fx_a_value_   = fx_a_value;
+    fx_b_value_   = fx_b_value;
+    muted_        = muted;
     reverb_value_ = reverb_value;
     SetPannerA(panner_a_value);
     SetPannerB(panner_b_value);

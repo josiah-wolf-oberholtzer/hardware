@@ -1,8 +1,8 @@
 # Project Name
-TARGET = LhowonVersio
+TARGET = HrongirVersio
 
 # Sources
-CPP_SOURCES = LhowonVersio.cpp
+CPP_SOURCES = HrongirVersio.cpp
 C_INCLUDES = -I../../Common/ -I../../Modules
 
 DEBUG=1

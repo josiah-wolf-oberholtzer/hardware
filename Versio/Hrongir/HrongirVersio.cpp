@@ -9,7 +9,6 @@ daisy::DaisyVersio hw;
 planetbosch::FloatFrame* frame;
 planetbosch::Hrongir hrongir;
 planetbosch::HrongirParams* params;
-// float DSY_SDRAM_BSS buffers[8][48000];
 
 void callback(
   daisy::AudioHandle::InterleavingInputBuffer  in,
@@ -17,6 +16,7 @@ void callback(
   size_t                                       size
 ) {
   hw.ProcessAnalogControls();
+
   params->mix = hw.GetKnobValue(daisy::DaisyVersio::KNOB_0);
   params->frequency_a = hw.GetKnobValue(daisy::DaisyVersio::KNOB_1);
   params->brightness = hw.GetKnobValue(daisy::DaisyVersio::KNOB_2);
@@ -25,6 +25,7 @@ void callback(
   params->frequency_b = hw.GetKnobValue(daisy::DaisyVersio::KNOB_5);
   params->fx = hw.GetKnobValue(daisy::DaisyVersio::KNOB_6);
   hrongir.Update(params);
+
   for (size_t i = 0; i < size; i += 2) {
     frame->in[0] = in[i];
     frame->in[1] = in[i + 1];

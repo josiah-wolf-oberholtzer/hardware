@@ -10,10 +10,33 @@ typedef struct {
   float damping;
   float frequency_a;
   float frequency_b;
+  float fx;
   float mix;
   float nonlinearity;
-  float fx;
 } HrongirParams;
+
+class MetaKarplus {
+public:
+  MetaKarplus() {}
+  ~MetaKarplus() {}
+
+  void Init(float sample_rate) { karplus_.Init(sample_rate); }
+
+  float Process(float value) { return karplus_.Process(value); }
+
+  void SetFrequency(float frequency) { karplus_.SetFreq(frequency); }
+
+  void SetBrightness(float value) { karplus_.SetBrightness(value); }
+
+  void SetDamping(float value) { karplus_.SetDamping(powf(value, 0.25)); }
+
+  void SetNonLinearity(float value) {
+    karplus_.SetNonLinearity((value - 0.5) * 2.f);
+  }
+
+private:
+  daisysp::String karplus_;
+};
 
 class Hrongir {
 public:
@@ -32,11 +55,11 @@ public:
 
   void Process(FloatFrame *frame) {
     for (int i = 0; i < 2; i++) {
-      frame->out[i] = (karplus_[i].Process(frame->in[i]) +
-                       karplus_[i + 2].Process(frame->in[i])) *
-                      0.5;
-      frame->out[i] = xfade_.Process(frame->in[i], frame->out[i]);
-      frame->out[i] = frequency_shifters_[i].Process(frame->out[i]);
+      float in  = frame->in[i];
+      float out = frequency_shifters_[i].Process(
+          (karplus_[i].Process(in) + karplus_[i + 2].Process(in)) / 2.f
+      );
+      frame->out[i] = xfade_.Process(in, out);
     };
   }
 
@@ -44,18 +67,19 @@ public:
     float base      = (value - 0.5) * 2.f;
     int   sign      = (0.f < base) - (base < 0.f);
     float frequency = 1000.f * (float)sign * powf(abs(base), 4.f);
-    frequency_shifters_[0].SetFrequency(frequency);
-    frequency_shifters_[1].SetFrequency(frequency);
+    for (int i = 0; i < 2; i++) {
+      frequency_shifters_[i].SetFrequency(frequency);
+    }
   }
 
   void SetKarplusAFrequency(float frequency) {
-    karplus_[0].SetFreq(frequency);
-    karplus_[1].SetFreq(frequency);
+    karplus_[0].SetFrequency(frequency);
+    karplus_[1].SetFrequency(frequency);
   }
 
   void SetKarplusBFrequency(float frequency) {
-    karplus_[2].SetFreq(frequency);
-    karplus_[3].SetFreq(frequency);
+    karplus_[2].SetFrequency(frequency);
+    karplus_[3].SetFrequency(frequency);
   }
 
   void SetKarplusBrightness(float value) {
@@ -65,18 +89,14 @@ public:
   }
 
   void SetKarplusDamping(float value) {
-    float scaled = powf(value, 0.25);
     for (int i = 0; i < 4; i++) {
-      karplus_[i].SetDamping(scaled);
+      karplus_[i].SetDamping(value);
     }
   }
 
   void SetKarplusNonLinearity(float value) {
-    float base      = (value - 0.5) * 2.f;
-    int   sign      = (0.f < base) - (base < 0.f);
-    float scaled    = (float)sign * powf(abs(base), 0.25);
     for (int i = 0; i < 4; i++) {
-      karplus_[i].SetNonLinearity(scaled);
+      karplus_[i].SetNonLinearity(value);
     }
   }
 
@@ -93,9 +113,9 @@ public:
   }
 
 private:
-  daisysp::String               karplus_[4];
-  planetbosch::XFade            xfade_;
+  MetaKarplus                   karplus_[4];
   planetbosch::FrequencyShifter frequency_shifters_[2];
+  planetbosch::XFade            xfade_;
 };
 
 } // namespace planetbosch

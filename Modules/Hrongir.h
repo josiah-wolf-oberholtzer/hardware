@@ -15,27 +15,49 @@ typedef struct {
   float nonlinearity;
 } HrongirParams;
 
-class MetaKarplus {
+template <size_t size> class Engine {
 public:
-  MetaKarplus() {}
-  ~MetaKarplus() {}
+  Engine() {}
+  ~Engine() {}
 
-  void Init(float sample_rate) { karplus_.Init(sample_rate); }
+  void Init(float sample_rate) {
+    for (size_t i = 0; i < size; i++) {
+      karplus_[i].Init(sample_rate);
+    }
+  }
 
-  float Process(float value) { return karplus_.Process(value); }
+  float Process(float value) {
+    float out = 0.f;
+    for (size_t i = 0; i < size; i++) {
+      out += karplus_[i].Process(value);
+    }
+    return out / (float)size;
+  }
 
-  void SetFrequency(float frequency) { karplus_.SetFreq(frequency); }
+  void SetFrequency(float frequency, size_t index) {
+    karplus_[index % size].SetFreq(frequency);
+  }
 
-  void SetBrightness(float value) { karplus_.SetBrightness(value); }
+  void SetBrightness(float brightness) {
+    for (size_t i = 0; i < size; i++) {
+      karplus_[i].SetBrightness(brightness);
+    }
+  }
 
-  void SetDamping(float value) { karplus_.SetDamping(powf(value, 0.25)); }
+  void SetDamping(float damping) {
+    for (size_t i = 0; i < size; i++) {
+      karplus_[i].SetDamping(damping);
+    }
+  }
 
-  void SetNonLinearity(float value) {
-    karplus_.SetNonLinearity((value - 0.5) * 2.f);
+  void SetNonLinearity(float nonlinearity) {
+    for (size_t i = 0; i < size; i++) {
+      karplus_[i].SetNonLinearity(nonlinearity);
+    }
   }
 
 private:
-  daisysp::String karplus_;
+  daisysp::String karplus_[size];
 };
 
 class Hrongir {
@@ -46,7 +68,7 @@ public:
   void Init(float sample_rate) {
     xfade_.Init(XFADE_CPOW);
     for (int i = 0; i < 4; i++) {
-      karplus_[i].Init(sample_rate);
+      engine_[i].Init(sample_rate);
     };
     for (int i = 0; i < 2; i++) {
       frequency_shifters_[i].Init(sample_rate);
@@ -57,7 +79,7 @@ public:
     for (int i = 0; i < 2; i++) {
       float in  = frame->in[i];
       float out = frequency_shifters_[i].Process(
-          (karplus_[i].Process(in) + karplus_[i + 2].Process(in)) / 2.f
+          (engine_[i].Process(in) + engine_[i + 2].Process(in)) / 2.f
       );
       frame->out[i] = xfade_.Process(in, out);
     };
@@ -73,30 +95,30 @@ public:
   }
 
   void SetKarplusAFrequency(float frequency) {
-    karplus_[0].SetFrequency(frequency);
-    karplus_[1].SetFrequency(frequency);
+    engine_[0].SetFrequency(frequency, 0);
+    engine_[1].SetFrequency(frequency, 0);
   }
 
   void SetKarplusBFrequency(float frequency) {
-    karplus_[2].SetFrequency(frequency);
-    karplus_[3].SetFrequency(frequency);
+    engine_[2].SetFrequency(frequency, 0);
+    engine_[3].SetFrequency(frequency, 0);
   }
 
   void SetKarplusBrightness(float value) {
     for (int i = 0; i < 4; i++) {
-      karplus_[i].SetBrightness(value);
+      engine_[i].SetBrightness(value);
     }
   }
 
   void SetKarplusDamping(float value) {
     for (int i = 0; i < 4; i++) {
-      karplus_[i].SetDamping(value);
+      engine_[i].SetDamping(powf(value, 0.25));
     }
   }
 
   void SetKarplusNonLinearity(float value) {
     for (int i = 0; i < 4; i++) {
-      karplus_[i].SetNonLinearity(value);
+      engine_[i].SetNonLinearity(powf(value, 0.25));
     }
   }
 
@@ -113,7 +135,7 @@ public:
   }
 
 private:
-  MetaKarplus                   karplus_[4];
+  Engine<1>                     engine_[4];
   planetbosch::FrequencyShifter frequency_shifters_[2];
   planetbosch::XFade            xfade_;
 };
